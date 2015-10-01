@@ -1,4 +1,4 @@
-export default class Document {
+export class Document {
   static create(content, meta = {}) {
     let nd = new Document();
     nd.content = content;

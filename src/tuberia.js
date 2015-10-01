@@ -1,4 +1,4 @@
-import Document from './tuberia-document';
+import { Document } from './tuberia-document';
 import { forcePromise } from './promise-utils';
 
 let pipelineCount = 0;
@@ -10,7 +10,7 @@ let handleList = function handleList(docs, ctx, mods) {
   if (ctx.debug) {
     console.log('About to execute module:', mod.constructor.name);
   }
-  let modPromise = forcePromise(mod.execute.bind(mod), docs, ctx);
+  let modPromise = forcePromise(::mod.execute, docs, ctx);
   let modlen = mods.length;
   while (modlen) {
     modPromise = modPromise.then(function (res) {
@@ -19,7 +19,7 @@ let handleList = function handleList(docs, ctx, mods) {
         if (ctx.debug) {
           console.log('About to execute module:', lmod.constructor.name);
         }
-        return forcePromise(lmod.execute.bind(lmod), res, ctx);
+        return forcePromise(::lmod.execute, res, ctx);
       }
       return res;
     });
@@ -37,13 +37,13 @@ class Pipeline {
   }
 
   execute(docs, ctx) {
-    let mods = this.modules;
+    let mods = this.modules.slice();
     if (ctx.debug) {
       console.log('Starting', this.name, 'pipeline...');
     }
     return handleList(docs, ctx, mods).then(r => {
       if (ctx.debug) {
-        console.log('Pipeline "' + this.name + '" ran with', this.modules.length, 'modules', ctx.debug ? ' in debug mode' : '');
+        console.log('Pipeline "' + this.name + '" ran with', this.modules.length, 'modules', ctx.debug ? 'in debug mode' : '');
       }
       return r;
     });
